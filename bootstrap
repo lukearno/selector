@@ -1,0 +1,20 @@
+
+# Set up to build, test or hack this project.
+# Requires Virtualenv http://pypi.python.org/pypi/virtualenv
+
+# If the virtualenv does not already exist at .virt/
+if ! test -d .virt/; then
+  # Install a virtualenv and install fabric
+  # Install selector in development mode
+  virtualenv --no-site-packages --distribute .virt/
+  . .virt/bin/activate
+  pip install fabric
+  python setup.py develop
+  fab devdeps
+fi
+
+# Activate the virtualenv in .virt/
+. .virt/bin/activate
+
+# List the available fab tasks
+fab -l

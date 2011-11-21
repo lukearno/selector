@@ -1,0 +1,9 @@
+coverage.xml
+build
+dist
+*.pyc
+.virt
+.coverage
+.tox
+*.egg-info
+trash
