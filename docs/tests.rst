@@ -9,14 +9,6 @@ tests Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`wsgiapps` Module
-----------------------
-
-.. automodule:: tests.wsgiapps
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 Subpackages
 -----------
 

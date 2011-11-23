@@ -17,3 +17,11 @@ functional Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`wsgiapps` Module
+----------------------
+
+.. automodule:: tests.functional.wsgiapps
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
