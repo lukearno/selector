@@ -4,6 +4,7 @@ fab -l       - list available tasks
 fab -d TASK  - describe a task in detail
 """
 
+import csv
 import sys
 
 from os.path import abspath as _abspath
@@ -13,6 +14,9 @@ import pkg_resources
 from fabric.api import local, puts, settings, hide, abort, lcd
 from fabric import colors as c
 from fabric.contrib.console import confirm
+
+
+import selector
 
 
 def _invirt():
@@ -138,6 +142,19 @@ def regenerate_api_docs():
             local('sphinx-apidoc -f -o docs/ . setup.py')
             local('rm -f docs/modules.rst')
             local('rm -f docs/setup.rst')
+
+
+def regenerate_expectations():
+    """Regenerate the expections for the SimpleParser unit tests."""
+    if not confirm(c.red('Are you _really_ sure you have a working parser??')):
+        abort(c.blue("Ok, check that out and come back when you are sure."))
+    parser = selector.SimpleParser()
+    with open('tests/unit/path-expressions.csv', 'r') as expressions:
+        with open('tests/unit/path-expression-expectations.csv', 'w') as out:
+            reader = csv.reader(expressions)
+            writer = csv.writer(out)
+            for (pathexpression,) in reader:
+                writer.writerow([pathexpression, parser(pathexpression)])
 
 
 def build_api_docs():
