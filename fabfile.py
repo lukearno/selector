@@ -10,7 +10,7 @@ from os.path import abspath as _abspath
 
 import pkg_resources
 
-from fabric.api import local, puts, settings, hide, abort
+from fabric.api import local, puts, settings, hide, abort, lcd
 from fabric import colors as c
 from fabric.contrib.console import confirm
 
@@ -144,7 +144,8 @@ def build_api_docs():
     """Build the HTML API docs."""
     puts(c.magenta("Building HTML API docs..."))
     with settings(hide('running', 'stdout', 'stderr')):
-        local('pushd docs && make html && popd')
+        with lcd('docs'):
+            local('make html')
 
 
 def clean(deep=False):
@@ -168,7 +169,8 @@ def clean(deep=False):
             local('rm -rf tests/*/__pycache__/')
             local('rm -rf tests/*/*.pyc')
             local('rm -rf htmlcov')
-            local('pushd docs && make clean && popd')
+            with lcd('docs'):
+                local('make clean')
             if deep:
                 puts(c.red("Removing virtualenv .virt/"))
                 puts(c.red("You will need to `. bootstrap` again."))
