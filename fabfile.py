@@ -142,6 +142,10 @@ def regenerate_api_docs():
             local('sphinx-apidoc -f -o docs/ . setup.py')
             local('rm -f docs/modules.rst')
             local('rm -f docs/setup.rst')
+            local('rm -f docs/fabfile.rst')
+            local('rm -f docs/tests.rst')
+            local('rm -f docs/tests.functional.rst')
+            local('rm -f docs/tests.unit.rst')
 
 
 def regenerate_expectations():

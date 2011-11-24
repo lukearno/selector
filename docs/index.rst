@@ -15,8 +15,6 @@ Contents:
    :maxdepth: 4
 
    selector
-   fabfile
-   tests
 
 Indices and tables
 ==================
