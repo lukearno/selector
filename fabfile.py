@@ -146,12 +146,14 @@ def buildtest():
 
     Does `pip` and `easy_install`.
     """
+    puts(c.blue("Running build/install test..."))
     with _freshvirt('.buildtest'):
         version = local('cat VERSION', capture=True)
-        local('sudo rm -rf dist/*')
+        local('rm -rf dist/*')
         local('python setup.py sdist bdist_egg')
         local('easy_install dist/selector-%s.tar.gz' % version)
         local('python -c "import selector"')
+    puts(c.magenta("Built and installed successfully"))
 
 
 def post_release_install_verification():
@@ -166,7 +168,7 @@ def post_release_install_verification():
     with _freshvirt('.buildtest'):
         local('easy_install selector')
         local('python -c "import selector"')
-    puts(c.magenta("Release verification successfull!"))
+    puts(c.magenta("Release verification successful!"))
 
 
 def devdeps():
