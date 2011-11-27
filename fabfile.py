@@ -154,6 +154,21 @@ def buildtest():
         local('python -c "import selector"')
 
 
+def post_release_install_verification():
+    """Try installing from pypi and importing in a clean virt.
+
+    Does `pip` and `easy_install`.
+    """
+    puts(c.blue("Running post-release install verification..."))
+    with _freshvirt('.buildtest'):
+        local('pip install selector')
+        local('python -c "import selector"')
+    with _freshvirt('.buildtest'):
+        local('easy_install selector')
+        local('python -c "import selector"')
+    puts(c.magenta("Release verification successfull!"))
+
+
 def devdeps():
     """Install the development dependencies.."""
     _invirt()
@@ -361,3 +376,4 @@ def release(branch, release_type):
         local('git push origin :%s' % branch)  # This deletes remote branch.
         local('git push --tags origin master')
         puts(c.magenta("Released branch %s as v%s!" % (branch, version)))
+        post_release_install_verification()
