@@ -9,3 +9,4 @@ dist
 trash
 htmlcov
 docs/_build
+.buildtest

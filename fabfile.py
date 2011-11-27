@@ -4,6 +4,7 @@ fab -l       - list available tasks
 fab -d TASK  - describe a task in detail
 """
 
+import contextlib
 import csv
 import sys
 
@@ -11,7 +12,7 @@ from os.path import abspath as _abspath
 
 import pkg_resources
 
-from fabric.api import local, puts, settings, hide, abort, lcd
+from fabric.api import local, puts, settings, hide, abort, lcd, prefix
 from fabric import colors as c
 from fabric.contrib.console import confirm
 
@@ -124,6 +125,33 @@ def autotest():
         local("echo %s > build/pyflakes-warnings.txt" % warnings_count)
     if violations_count or warnings_count:
         abort(c.red("Style check failed!"))
+
+
+@contextlib.contextmanager
+def _freshvirt(virt):
+    puts(virt)
+    local('rm -rf %s' % virt)
+    local('virtualenv --no-site-packages --distribute %s' % virt)
+    with prefix('. %s/bin/activate' % virt):
+        with settings(hide('stdout', 'stderr', 'warnings', 'running'),
+                      warn_only=True):
+            result = local('python -c "import selector"')
+            if result.return_code != 1:
+                abort(c.red("Failed to create clean virt without selector."))
+        yield
+
+
+def buildtest():
+    """Try installing from egg and importing in a clean virt.
+
+    Does `pip` and `easy_install`.
+    """
+    with _freshvirt('.buildtest'):
+        version = local('cat VERSION', capture=True)
+        local('sudo rm -rf dist/*')
+        local('python setup.py sdist bdist_egg')
+        local('easy_install dist/selector-%s.tar.gz' % version)
+        local('python -c "import selector"')
 
 
 def devdeps():
