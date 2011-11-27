@@ -144,7 +144,7 @@ def _freshvirt(virt):
 def buildtest():
     """Try installing from egg and importing in a clean virt.
 
-    Does `pip` and `easy_install`.
+    Builds and does `easy_install` of tarball.
     """
     puts(c.blue("Running build/install test..."))
     with _freshvirt('.buildtest'):
