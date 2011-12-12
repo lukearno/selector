@@ -299,6 +299,14 @@ def compute_version(release_type, rc=False):
 
 def _sync_and_preflight_check(branch, release_type):
     """Sync up repository and check that things are in order for release."""
+    # Ready to sign?
+    puts(c.blue("Checking that gpg-agent is available..."))
+    local("gpg-agent")
+    puts(c.blue("Check that our signing key is in working order..."))
+    keyname = local('git config user.signingkey', capture=True)
+    puts(c.magenta("Using signing key: %s" % keyname))
+    local("gpg --sign --local-user '%s' README.md" % keyname)
+    local('rm README.md.gpg')
     # Sync.
     puts(c.blue("Git fetching origin..."))
     local("git fetch origin",  capture=True)
@@ -338,7 +346,7 @@ def _sync_and_preflight_check(branch, release_type):
     if not confirm("Are the changes and version correct?"):
         abort(c.red("Aborting release"))
 
-    return version, changes
+    return version, changes, keyname
 
 
 def release(branch, release_type):
@@ -354,7 +362,8 @@ def release(branch, release_type):
     _invirt()
     with settings(hide('stderr', 'stdout', 'running')):
         # Preflight checks.
-        version, changes = _sync_and_preflight_check(branch, release_type)
+        version, changes, keyname = _sync_and_preflight_check(branch,
+                                                              release_type)
         puts(c.blue("Testing..."))
         # Lets check out this branch and test it.
         local("git checkout %s" % branch,  capture=True)
@@ -364,12 +373,13 @@ def release(branch, release_type):
         # Commit to the version file.
         local('echo "%s" > VERSION' % version)
         # Build
-        local("python setup.py register sdist bdist_egg upload")
+        local("python setup.py register sdist bdist_egg upload"
+              " --sign --identity %s" % keyname)
         puts(c.green("Uploaded to PyPI!"))
         # Commit the version change and tag the release.
         puts(c.blue("Commit, tag, merge, prune and push."))
         local('git commit -m"Bumped version to v%s" -a' % version)
-        local('git tag -a "v%s" -m "Release version %s"' % (version, version))
+        local('git tag -s "v%s" -m "Release version %s"' % (version, version))
         # Merge the branch into master and push them both to origin
         # Conflicts should never occur, due to preflight checks.
         local('git checkout master', capture=True)
