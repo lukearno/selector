@@ -102,7 +102,7 @@ class Selector(object):
         method_dict = dict(method_dict)
         method_dict.update(http_methods)
         if self.wrap is not None:
-            for meth, cbl in method_dict.items():
+            for meth, cbl in list(method_dict.items()):
                 method_dict[meth] = self.wrap(cbl)
         regex = self.parser(prefix + path)
         compiled_regex = re.compile(regex)
@@ -115,12 +115,12 @@ class Selector(object):
         app, svars, methods, matched = \
             self.select(environ['PATH_INFO'], environ['REQUEST_METHOD'])
         unnamed, named = [], {}
-        for k, v in svars.iteritems():
+        for k, v in svars.items():
             if k.startswith('__pos'):
                 k = k[5:]
             named[k] = v
         environ['selector.vars'] = dict(named)
-        for k in named.keys():
+        for k in list(named.keys()):
             if k.isdigit():
                 unnamed.append((k, named.pop(k)))
         unnamed.sort()
@@ -143,7 +143,7 @@ class Selector(object):
         for regex, method_dict in self.mappings:
             match = regex.search(path)
             if match:
-                methods = method_dict.keys()
+                methods = list(method_dict.keys())
                 if method in method_dict:
                     return (method_dict[method],
                             match.groupdict(),
@@ -175,11 +175,12 @@ class Selector(object):
             try:
                 try:
                     for line in the_file:
+                        line = line.decode()
                         lineno += 1
                         path, methods = self._parse_line(line, path, methods)
                     if path and methods:
                         self.add(path, methods)
-                except MappingFileError, mfe:
+                except MappingFileError as mfe:
                     raise MappingFileError("line %s: %s" % (lineno, mfe))
             finally:
                 self.wrap = oldwrap
@@ -312,14 +313,14 @@ class SimpleParser(object):
         """Turn a path expression into regex."""
         if self.ostart in text:
             parts = self._outermost_optionals_split(text)
-            parts = map(self._parse, parts)
+            parts = list(map(self._parse, parts))
             parts[1::2] = ["(%s)?" % p for p in parts[1::2]]
         else:
             parts = [part.split(self.end)
                      for part in text.split(self.start)]
             parts = [y for x in parts for y in x]
-            parts[::2] = map(re.escape, parts[::2])
-            parts[1::2] = map(self._lookup, parts[1::2])
+            parts[::2] = list(map(re.escape, parts[::2]))
+            parts[1::2] = list(map(self._lookup, parts[1::2]))
         return ''.join(parts)
 
     def __call__(self, url_pattern):
@@ -442,7 +443,7 @@ def pliant(func):
         args = list(args)
         args.insert(0, start_response)
         args.insert(0, environ)
-        return apply(func, args, dict(kwargs))
+        return func(*args, **dict(kwargs))
     return wsgi_func
 
 
@@ -462,5 +463,5 @@ def opliant(meth):
         args.insert(0, start_response)
         args.insert(0, environ)
         args.insert(0, self)
-        return apply(meth, args, dict(kwargs))
+        return meth(*args, **dict(kwargs))
     return wsgi_meth

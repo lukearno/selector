@@ -3,7 +3,7 @@
 from setuptools import setup
 
 
-with open('VERSION', 'rb') as version_file:
+with open('VERSION', 'r') as version_file:
     version = version_file.read().strip()
 
 setup(name='selector',
@@ -27,10 +27,7 @@ setup(name='selector',
       license="MIT",
       py_modules=['selector'],
       packages=[],
-      install_requires="""
-        wsgiref
-        resolver
-        """,
+      install_requires=['resolver'],
       keywords="wsgi delegation routing web http rest webapps",
       classifiers=[
         'Development Status :: 3 - Alpha',
