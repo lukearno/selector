@@ -1,6 +1,6 @@
 """Functional tests for `Selector()`."""
 
-
+from webob import Request, Response
 from .wsgiapps import say_hello, here_i_am, say_hello_positional
 
 
@@ -41,3 +41,22 @@ def test_404_and_405(selector, browser, go):
     assert code == 405
     assert page.startswith("405 Method Not Allowed")
     assert "Allow: POST\n" in list(headers)
+
+
+def test_seperate_http_method_paths(selector, browser, go):
+    selector.add('/ws/hello', GET=here_i_am)
+    selector.add('/ws/{slug}', POST=here_i_am)
+
+    request = Request.blank('/ws/hello', method='GET')
+    response = request.send (selector)
+
+    assert response.status_code == 200
+    assert response.body.startswith("Here I am.")
+
+    request = Request.blank('/ws/hello', method='POST')
+    response = request.send (selector)
+
+    assert response.status_code == 200
+    assert response.body.startswith("Here I am.")
+
+
