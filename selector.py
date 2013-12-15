@@ -140,6 +140,8 @@ class Selector(object):
         """Figure out which app to delegate to or send 404 or 405.
 
         """
+        response = (self.status404, {}, [], '')
+
         for regex, method_dict in self.mappings:
             match = regex.search(path)
             if match:
@@ -155,8 +157,11 @@ class Selector(object):
                             methods,
                             match.group(0))
                 else:
-                    return self.status405, {}, methods, ''
-        return self.status404, {}, [], ''
+                    # Do not return the 405 response right away, there could
+                    # still be a match in mappings we haven't tried yet.
+                    response = (self.status405, {}, methods, '')
+
+        return response
 
     def slurp_file(self, filename, prefix=None, parser=None, wrap=None):
         """Read mappings from a simple text file. (See README.md.)"""
